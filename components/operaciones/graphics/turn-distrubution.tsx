@@ -41,8 +41,6 @@ const processData = (data: any[]) => {
 export default function TurnDistributionGraphic({ data, selectedGuardia }: { data: any[]; selectedGuardia: string }) {
   const processedData = processData(data)
 
-  console.log("Processed Data for Chart:", processedData)
-
   // Definir colores para los turnos
   const dayColor = "#34d399" // Verde para Día
   const nightColor = "#f0a04b" // Naranja para Noche

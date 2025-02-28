@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import {
   BarChart,
@@ -11,6 +12,7 @@ import {
 } from "recharts";
 import { Hammer, ExternalLink } from 'lucide-react';
 import { Card } from "@/components/ui/card";
+import { Month, StatiticsData, week } from "@/models/api";
 
 const relevantFields = [
   "CRE E3000 1x12",
@@ -37,17 +39,114 @@ const relevantFields = [
   "Cordon detonante 5P"
 ];
 
-export default function CurrentExplosivesGraphic({data}: {data: any[]}) {
+type Data = {
+  selectedMonths: Month[] | [],
+  selectedWeeks: week[] | [],
+  data: any[] | []
+}
+
+export default function CurrentExplosivesGraphic({ data, selectedMonths, selectedWeeks }: Data) {
+  const normalizeMonth = (month: string) => month.slice(0, 3).toLowerCase();
+
+  // Mapeo de números de mes a nombres abreviados
+  const monthNumberToName = (monthNumber: string) => {
+    const monthMap: { [key: string]: string } = {
+      "01": "Jan",
+      "02": "Feb",
+      "03": "Mar",
+      "04": "Apr",
+      "05": "May",
+      "06": "Jun",
+      "07": "Jul",
+      "08": "Aug",
+      "09": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    };
+    return monthMap[monthNumber] || monthNumber; // Fallback al valor original si no hay coincidencia
+  };
+
+  console.log("Datos de entrada (data):", data);
+  console.log("Semanas seleccionadas:", selectedWeeks);
+  console.log("Meses seleccionados:", selectedMonths);
+
+  const getFilteredData = () => {
+    if (!data || data.length === 0) {
+      console.log("No hay datos disponibles para procesar.");
+      return data;
+    }
+
+    if (selectedWeeks.length > 0) {
+      return data.filter((item: StatiticsData) => {
+        return selectedWeeks.some(w => {
+          const normalizedItemMonth = normalizeMonth(item["Month Short"]);
+          const normalizedSelectedMonth = normalizeMonth(monthNumberToName(w.month));
+          const yearMatch = item.Anual === Number(w.year);
+          const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
+          const weekMatch = item.Semana === w.week;
+
+          console.log(`Filtro semana - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs w.month=${w.month} (mapped: ${monthNumberToName(w.month)}, normalized: ${normalizedSelectedMonth})`);
+          console.log(`Filtro semana - Comparando: item.Semana=${item.Semana} vs w.week=${w.week}`);
+          console.log(`Filtro semana - Comparando: item.Anual=${item.Anual} vs w.year=${w.year} (Number: ${Number(w.year)})`);
+          console.log(`Filtro semana - Resultado: weekMatch=${weekMatch}, monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
+
+          return weekMatch && monthMatch && yearMatch;
+        });
+      });
+    } else if (selectedMonths.length > 0) {
+      return data.filter((item: StatiticsData) => {
+        return selectedMonths.some(m => {
+          const normalizedItemMonth = normalizeMonth(item["Month Short"]);
+          const normalizedSelectedMonth = normalizeMonth(monthNumberToName(m.month));
+          const yearMatch = item.Anual === Number(m.year);
+          const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
+
+          console.log(`Filtro mes - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs m.month=${m.month} (mapped: ${monthNumberToName(m.month)}, normalized: ${normalizedSelectedMonth})`);
+          console.log(`Filtro mes - Comparando: item.Anual=${item.Anual} vs m.year=${m.year} (Number: ${Number(m.year)})`);
+          console.log(`Filtro mes - Resultado: monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
+
+          return monthMatch && yearMatch;
+        });
+      });
+    }
+    return data; // Si no hay filtros, devolver todos los datos
+  };
+
+  const filteredData = getFilteredData();
+
   // Process the data to sum the relevant fields and filter out zeros
   const processedData = relevantFields
     .map((field) => {
-      const sum = data.reduce((acc, curr) => acc + (curr[field] || 0), 0);
+      const sum = filteredData.reduce((acc, curr) => acc + (curr[field] || 0), 0);
       return {
         name: field,
         value: sum
       };
     })
     .filter(item => item.value > 0);
+
+  console.log("Datos procesados:", processedData);
+
+  // Si no hay datos procesados, mostrar un mensaje
+  if (processedData.length === 0) {
+    return (
+      <Card className="w-full bg-[#111827] text-white border-none p-4">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Hammer className="h-5 w-5 text-[#FFA500]" />
+            <h2 className="text-xl font-medium text-[#FFA500]">
+              Actual Explosivos
+            </h2>
+          </div>
+          <ExternalLink className="h-5 w-5 text-gray-400" />
+        </div>
+        <div className="h-[400px] flex items-center justify-center">
+          <p className="text-gray-400">No hay datos disponibles para mostrar.</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full bg-[#111827] text-white border-none p-4">

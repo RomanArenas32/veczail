@@ -9,10 +9,12 @@ import CurrentSteelsGraphic from "@/components/operaciones/graphics/current-stee
 import ProgressOperationGraphic from "@/components/operaciones/graphics/progress-operation";
 import TurnDistrubutionGraphic from "@/components/operaciones/graphics/turn-distrubution";
 import { Button } from "@/components/ui/button";
-import { StatiticsData } from "@/models/api";
-import { Calendar, Check, Moon, Sun } from "lucide-react"; // Quitamos Clock
+import { Month, StatiticsData, week } from "@/models/api";
+import { Calendar, Check, Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+
 
 const months = [
     { name: "Jan", value: "01" },
@@ -32,12 +34,13 @@ const months = [
 export default function Operaciones() {
     const [data, setData] = useState<StatiticsData[]>([]);
     const [activePeriod, setActivePeriod] = useState<"Mes" | "Semana">("Mes");
-    const [guardiaSelection, setGuardiaSelection] = useState<{ Día: boolean; Noche: boolean }>({ Día: false, Noche: false }); // Estado para rastrear selección
-    const [selectedMonths, setSelectedMonths] = useState<{ month: string; year: string }[]>([]);
-    const [selectedWeeks, setSelectedWeeks] = useState<{ week: string; month: string; year: string }[]>([]);
+    const [guardiaSelection, setGuardiaSelection] = useState<{ Día: boolean; Noche: boolean }>({ Día: false, Noche: false });
+    const [selectedMonths, setSelectedMonths] = useState<Month[]>([]);
+    const [selectedWeeks, setSelectedWeeks] = useState<week[]>([]);
     const [monthPopoverOpen, setMonthPopoverOpen] = useState(false);
     const [weekPopoverOpen, setWeekPopoverOpen] = useState(false);
     const [filterData, setFilterData] = useState<StatiticsData[]>([]);
+
 
 
     const fetchData = useCallback(async () => {
@@ -49,7 +52,6 @@ export default function Operaciones() {
         }
     }, []);
 
-    // Helper function to get unique months per year from data
     const getAvailableMonthsByYear = useCallback(() => {
         const yearMonthMap: { [key: string]: Set<string> } = {};
         
@@ -68,7 +70,6 @@ export default function Operaciones() {
         return yearMonthMap;
     }, [data]);
 
-    // Helper function to get unique weeks per month and year
     const getAvailableWeeksByMonthAndYear = useCallback(() => {
         const yearMonthWeekMap: { [key: string]: { [key: string]: Set<string> } } = {};
         
@@ -91,7 +92,6 @@ export default function Operaciones() {
         return yearMonthWeekMap;
     }, [data]);
 
-    // Convert month short name to value
     const getMonthValue = (monthShort: string) => {
         const month = months.find(m => m.name === monthShort);
         return month?.value || "";
@@ -106,6 +106,8 @@ export default function Operaciones() {
             const exists = prev.some(m => m.month === month && m.year === year);
             return exists ? prev.filter(m => !(m.month === month && m.year === year)) : [...prev, { month, year }];
         });
+        // Al seleccionar un mes, limpiar las semanas seleccionadas
+        setSelectedWeeks([]);
     };
 
     const toggleWeekSelection = (week: string, month: string, year: string) => {
@@ -115,9 +117,19 @@ export default function Operaciones() {
                 ? prev.filter(w => !(w.week === week && w.month === month && w.year === year)) 
                 : [...prev, { week, month, year }];
         });
+        // Al seleccionar una semana, limpiar los meses seleccionados
+        setSelectedMonths([]);
     };
 
-    // Función para alternar la selección de "Día" o "Noche"
+    const handleSetActivePeriod = (period: "Mes" | "Semana") => {
+        setActivePeriod(period);
+        if (period === "Mes") {
+            setSelectedWeeks([]); // Limpia semanas al cambiar a Mes
+        } else {
+            setSelectedMonths([]); // Limpia meses al cambiar a Semana
+        }
+    };
+
     const toggleGuardia = (guardia: "Día" | "Noche") => {
         setGuardiaSelection(prev => ({
             ...prev,
@@ -125,7 +137,6 @@ export default function Operaciones() {
         }));
     };
 
-    // Determinar el valor efectivo de selectedGuardia para pasar a los componentes
     const effectiveGuardia = guardiaSelection.Día && guardiaSelection.Noche 
         ? "Todo" 
         : guardiaSelection.Día 
@@ -147,7 +158,7 @@ export default function Operaciones() {
                             <Button
                                 variant="ghost"
                                 className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Mes" ? "bg-[#7E69AB]/20 text-[#7E69AB]" : "text-slate-400"}`}
-                                onClick={() => setActivePeriod("Mes")}
+                                onClick={() => handleSetActivePeriod("Mes")}
                             >
                                 <Calendar className="w-4 h-4" />
                                 {selectedMonths.length > 0
@@ -160,7 +171,7 @@ export default function Operaciones() {
                         </PopoverTrigger>
 
                         <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
-                            <p className="w-full text-end text-sm text-slate-100 underline" onClick={()=>setSelectedMonths([])}>Limpiar</p>
+                            <p className="w-full text-end text-sm text-slate-100 underline hover:cursor-pointer" onClick={() => setSelectedMonths([])}>Limpiar</p>
                             {years.map(year => {
                                 const availableMonths = getAvailableMonthsByYear()[year.toString()];
                                 if (!availableMonths || availableMonths.size === 0) return null;
@@ -208,7 +219,7 @@ export default function Operaciones() {
                             <Button
                                 variant="ghost"
                                 className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Semana" ? "bg-[#0EA5E9]/20 text-[#0EA5E9]" : "text-slate-400"}`}
-                                onClick={() => setActivePeriod("Semana")}
+                                onClick={() => handleSetActivePeriod("Semana")}
                             >
                                 <Calendar className="w-4 h-4" />
                                 {selectedWeeks.length > 0
@@ -220,8 +231,8 @@ export default function Operaciones() {
                             </Button>
                         </PopoverTrigger>
 
-                        <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
-                        <p className="w-full text-end text-sm text-slate-100 underline" onClick={()=>setSelectedWeeks([])}>Limpiar</p>
+                        <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold max-h-[300px] overflow-y-auto">
+                            <p className="w-full text-end text-sm text-slate-100 underline hover:cursor-pointer" onClick={() => setSelectedWeeks([])}>Limpiar</p>
 
                             {years.map(year => {
                                 const availableMonths = getAvailableWeeksByMonthAndYear()[year.toString()];
@@ -288,10 +299,10 @@ export default function Operaciones() {
             <CardOnboarding data={data} />
 
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
-                <ProgressOperationGraphic data={data} />
+                <ProgressOperationGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
                 <TurnDistrubutionGraphic data={data} selectedGuardia={effectiveGuardia} />
-                <CurrentSteelsGraphic data={data} />
-                <CurrentExplosivesGraphic data={data}/>
+                <CurrentSteelsGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
+                <CurrentExplosivesGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
             </div>
         </div>
     );
