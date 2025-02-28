@@ -4,11 +4,10 @@ import { StatiticsData } from "@/models/api";
 import { CircleIcon } from "lucide-react"
 
 export default function CardProgress({ selectedGuardia, data }: { selectedGuardia?: string, data: StatiticsData[] }) {
-
   if (!data) return null; // Evita errores si data es undefined
 
-  // Filtrar datos según la guardia seleccionada o traer todos si no hay filtro
-  const filteredData = selectedGuardia
+  // Filtrar datos según la guardia seleccionada o traer todos si es "Todo" o no hay filtro
+  const filteredData = selectedGuardia && selectedGuardia !== "Todo"
     ? data.filter(item => item.Guardia === selectedGuardia)
     : data;
 
@@ -17,8 +16,13 @@ export default function CardProgress({ selectedGuardia, data }: { selectedGuardi
 
   // Iterar sobre los datos filtrados y sumar los valores
   for (const item of filteredData) {
-    executed += item.Avance_ejec ?? 0;  
-    programmed += item.Avance_programado ?? 0;
+    // Asegurarse de que Avance_ejec sea un número, si no, usar 0
+    const avanceEjec = typeof item.Avance_ejec === 'number' ? item.Avance_ejec : 0;
+    // Asegurarse de que Avance_programado sea un número, si no, usar 0
+    const avanceProg = typeof item.Avance_programado === 'number' ? item.Avance_programado : 0;
+
+    executed += avanceEjec;
+    programmed += avanceProg;
   }
 
   // Redondear valores a 1 decimal
@@ -32,7 +36,7 @@ export default function CardProgress({ selectedGuardia, data }: { selectedGuardi
     <div className="bg-slate-900 p-6 rounded-lg text-white">
       <div className="flex items-center gap-2 mb-4">
         <CircleIcon className="h-5 w-5 text-purple-500" />
-        <span className="text-gray-300 font-medium">Total Ejecutado / Programado</span>
+        <span className="text-gray-300 font-medium">Total Ejecutado / Programado {`(${selectedGuardia})`}</span>
       </div>
 
       <div className="flex justify-between mb-3">

@@ -10,7 +10,7 @@ import ProgressOperationGraphic from "@/components/operaciones/graphics/progress
 import TurnDistrubutionGraphic from "@/components/operaciones/graphics/turn-distrubution";
 import { Button } from "@/components/ui/button";
 import { StatiticsData } from "@/models/api";
-import { Calendar, Check, Moon, Sun } from "lucide-react";
+import { Calendar, Check, Moon, Sun } from "lucide-react"; // Quitamos Clock
 import { useCallback, useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -32,11 +32,13 @@ const months = [
 export default function Operaciones() {
     const [data, setData] = useState<StatiticsData[]>([]);
     const [activePeriod, setActivePeriod] = useState<"Mes" | "Semana">("Mes");
-    const [selectedGuardia, setSelectedGuardia] = useState<"Día" | "Noche">("Día");
+    const [guardiaSelection, setGuardiaSelection] = useState<{ Día: boolean; Noche: boolean }>({ Día: false, Noche: false }); // Estado para rastrear selección
     const [selectedMonths, setSelectedMonths] = useState<{ month: string; year: string }[]>([]);
     const [selectedWeeks, setSelectedWeeks] = useState<{ week: string; month: string; year: string }[]>([]);
     const [monthPopoverOpen, setMonthPopoverOpen] = useState(false);
     const [weekPopoverOpen, setWeekPopoverOpen] = useState(false);
+    const [filterData, setFilterData] = useState<StatiticsData[]>([]);
+
 
     const fetchData = useCallback(async () => {
         try {
@@ -115,6 +117,23 @@ export default function Operaciones() {
         });
     };
 
+    // Función para alternar la selección de "Día" o "Noche"
+    const toggleGuardia = (guardia: "Día" | "Noche") => {
+        setGuardiaSelection(prev => ({
+            ...prev,
+            [guardia]: !prev[guardia],
+        }));
+    };
+
+    // Determinar el valor efectivo de selectedGuardia para pasar a los componentes
+    const effectiveGuardia = guardiaSelection.Día && guardiaSelection.Noche 
+        ? "Todo" 
+        : guardiaSelection.Día 
+        ? "Día" 
+        : guardiaSelection.Noche 
+        ? "Noche" 
+        : "Todo";
+
     const currentYear = new Date().getFullYear();
     const years = [currentYear, currentYear - 1];
 
@@ -127,21 +146,21 @@ export default function Operaciones() {
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Mes" ? "bg-[#7E69AB]/20 text-[#7E69AB]" : "text-slate-400"
-                                    }`}
+                                className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Mes" ? "bg-[#7E69AB]/20 text-[#7E69AB]" : "text-slate-400"}`}
                                 onClick={() => setActivePeriod("Mes")}
                             >
                                 <Calendar className="w-4 h-4" />
                                 {selectedMonths.length > 0
                                     ? (() => {
-                                        const text = selectedMonths.map(m => `${m.month}/${m.year}`).join(", ");
-                                        return text.length > 10 ? text.slice(0, 5) + "..." : text;
-                                    })()
+                                          const text = selectedMonths.map(m => `${m.month}/${m.year}`).join(", ");
+                                          return text.length > 10 ? text.slice(0, 5) + "..." : text;
+                                      })()
                                     : "Mes"}
                             </Button>
                         </PopoverTrigger>
 
                         <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
+                            <p className="w-full text-end text-sm text-slate-100 underline" onClick={()=>setSelectedMonths([])}>Limpiar</p>
                             {years.map(year => {
                                 const availableMonths = getAvailableMonthsByYear()[year.toString()];
                                 if (!availableMonths || availableMonths.size === 0) return null;
@@ -156,7 +175,7 @@ export default function Operaciones() {
                                     <div key={year} className="border-b border-slate-700 last:border-none pb-4 mb-4 last:pb-0 last:mb-0">
                                         <p className="text-sm text-slate-400 mb-2">{year}</p>
                                         <div className="grid grid-cols-4 gap-2">
-                                            {monthGroups.map((group, groupIndex) => (
+                                            {monthGroups.map((group) => (
                                                 group.map((monthShort) => {
                                                     const monthValue = getMonthValue(monthShort);
                                                     const isSelected = selectedMonths.some(
@@ -166,9 +185,7 @@ export default function Operaciones() {
                                                     return (
                                                         <button
                                                             key={`${year}-${monthShort}`}
-                                                            className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${
-                                                                isSelected ? "bg-slate-700" : ""
-                                                            }`}
+                                                            className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${isSelected ? "bg-slate-700" : ""}`}
                                                             onClick={() => toggleMonthSelection(monthValue, year.toString())}
                                                         >
                                                             <span>{monthShort}</span>
@@ -190,21 +207,22 @@ export default function Operaciones() {
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Semana" ? "bg-[#0EA5E9]/20 text-[#0EA5E9]" : "text-slate-400"
-                                    }`}
+                                className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Semana" ? "bg-[#0EA5E9]/20 text-[#0EA5E9]" : "text-slate-400"}`}
                                 onClick={() => setActivePeriod("Semana")}
                             >
                                 <Calendar className="w-4 h-4" />
                                 {selectedWeeks.length > 0
                                     ? (() => {
-                                        const text = selectedWeeks.map(w => `${w.week} ${w.month}/${w.year}`).join(", ");
-                                        return text.length > 10 ? text.slice(0, 5) + "..." : text;
-                                    })()
+                                          const text = selectedWeeks.map(w => `${w.week} ${w.month}/${w.year}`).join(", ");
+                                          return text.length > 10 ? text.slice(0, 5) + "..." : text;
+                                      })()
                                     : "Semana"}
                             </Button>
                         </PopoverTrigger>
 
                         <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
+                        <p className="w-full text-end text-sm text-slate-100 underline" onClick={()=>setSelectedWeeks([])}>Limpiar</p>
+
                             {years.map(year => {
                                 const availableMonths = getAvailableWeeksByMonthAndYear()[year.toString()];
                                 if (!availableMonths) return null;
@@ -226,9 +244,7 @@ export default function Operaciones() {
                                                             return (
                                                                 <button
                                                                     key={`${year}-${monthShort}-${week}`}
-                                                                    className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${
-                                                                        isSelected ? "bg-slate-700" : ""
-                                                                    }`}
+                                                                    className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${isSelected ? "bg-slate-700" : ""}`}
                                                                     onClick={() => toggleWeekSelection(week, monthValue, year.toString())}
                                                                 >
                                                                     <span>{week}</span>
@@ -250,18 +266,17 @@ export default function Operaciones() {
 
                     <Button
                         variant="ghost"
-                        className={`px-4 py-2 transition-all duration-300 gap-2 ${selectedGuardia === "Día" ? "bg-[#F97316]/20 text-[#F97316]" : "text-slate-400"
-                            }`}
-                        onClick={() => setSelectedGuardia("Día")}
+                        className={`px-4 py-2 transition-all duration-300 gap-2 ${guardiaSelection.Día ? "bg-[#F97316]/20 text-[#F97316]" : "text-slate-400"}`}
+                        onClick={() => toggleGuardia("Día")}
                     >
                         <Sun className="w-4 h-4" />
                         Día
                     </Button>
 
                     <Button
-                        className={`px-4 py-2 transition-all duration-300 gap-2 ${selectedGuardia === "Noche" ? "bg-[#1A1F2C]/50 text-slate-300" : "text-slate-400"
-                            }`}
-                        onClick={() => setSelectedGuardia("Noche")}
+                        variant="ghost"
+                        className={`px-4 py-2 transition-all duration-300 gap-2 ${guardiaSelection.Noche ? "bg-[#1A1F2C]/50 text-slate-300" : "text-slate-400"}`}
+                        onClick={() => toggleGuardia("Noche")}
                     >
                         <Moon className="w-4 h-4" />
                         Noche
@@ -269,49 +284,14 @@ export default function Operaciones() {
                 </div>
             </div>
 
-            <CardProgress selectedGuardia={selectedGuardia} data={data} />
+            <CardProgress selectedGuardia={effectiveGuardia} data={data} />
             <CardOnboarding data={data} />
 
-            <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
                 <ProgressOperationGraphic data={data} />
-                <TurnDistrubutionGraphic data={data} selectedGuardia={selectedGuardia} />
-                {/* ESTA BASADO EN: EJE X: CANTIDAD  en el y va: "Cordon detonante 5P": 0,
-                "Cuadro resumen B.C3": 0,
-                "Cuadro resumen B.C4": 0,
-                "Cuadro resumen B.C5": 0,
-                "Cuadro resumen B.C6": 0,
-                "Cuadro resumen B.C8": 0,
-                "Cuadro resumen B.I3": 0,
-                "Cuadro resumen B.I4": 0,
-                "Cuadro resumen B.I5": 0,
-                "Cuadro resumen B.I6": 0,
-                "Cuadro resumen BROCAS 38": 0*/}
+                <TurnDistrubutionGraphic data={data} selectedGuardia={effectiveGuardia} />
                 <CurrentSteelsGraphic data={data} />
-
-                {/*el eje Y es: "CRE E1000 1x12": 0,
-                "CRE E3000 1x12": 0,
-                "CRE E5000 1x12": 0,
-                "E3000 1 14\"X24\"": 0,
-                "E5000 1 14\"X12\"": 0,
-                "E1000 1 14\"X24\"": 0,
-                "E1000 1 14\"X16\"": 0,
-                "E1000 \"1x7\"": 0,
-                "E3000 \"1x8\"": 0,
-                "E5000 78": 0,
-                "CRE Carmex \"1 x 5\"": 0,
-                "CRE Carmex \"1 x 8\"": 0,
-                "CRE Carmex \"2 x 1\"": 0,
-                "CRE Carmex \"2 x 40\"": 0,
-                "CRE Carmex \"3 x 60\"": 0,
-                "CRE Carmex \"4 x 50\"": 0,
-                "Carmex Blanca \"1X5\"": 0,
-                "CRE Mecha Rapida": 0,
-                "FANEL LARGO LP 3.60": 0,
-                "FANEL CORTO MS 4.0": 0,
-                "FANEL LARGO 4.2": 0,
-                "Mukinel  LP Largo 4.20": 0,
-                "Cordon detonante 5P": 0 , EN EL EJE X VA LA CANTIDAD*/}
-                <CurrentExplosivesGraphic data={data} layout={"vertical"} categories={[]} index={""} colors={[]} />
+                <CurrentExplosivesGraphic data={data}/>
             </div>
         </div>
     );
