@@ -68,14 +68,10 @@ export default function TurnDistributionGraphic({ data, selectedMonths, selected
     return monthMap[monthNumber] || monthNumber; // Fallback al valor original si no hay coincidencia
   };
 
-  console.log("Datos de entrada (data):", data);
-  console.log("Semanas seleccionadas:", selectedWeeks);
-  console.log("Meses seleccionados:", selectedMonths);
-  console.log("Guardia seleccionada:", selectedGuardia);
 
   const getFilteredData = () => {
     if (!data || data.length === 0) {
-      console.log("No hay datos disponibles para procesar.");
+
       return data;
     }
 
@@ -91,11 +87,6 @@ export default function TurnDistributionGraphic({ data, selectedMonths, selected
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
           const weekMatch = item.Semana === w.week;
 
-          console.log(`Filtro semana - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs w.month=${w.month} (mapped: ${monthNumberToName(w.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Filtro semana - Comparando: item.Semana=${item.Semana} vs w.week=${w.week}`);
-          console.log(`Filtro semana - Comparando: item.Anual=${item.Anual} vs w.year=${w.year} (Number: ${Number(w.year)})`);
-          console.log(`Filtro semana - Resultado: weekMatch=${weekMatch}, monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
-
           return weekMatch && monthMatch && yearMatch;
         });
       });
@@ -109,9 +100,6 @@ export default function TurnDistributionGraphic({ data, selectedMonths, selected
           const yearMatch = item.Anual === Number(m.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
 
-          console.log(`Filtro mes - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs m.month=${m.month} (mapped: ${monthNumberToName(m.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Filtro mes - Comparando: item.Anual=${item.Anual} vs m.year=${m.year} (Number: ${Number(m.year)})`);
-          console.log(`Filtro mes - Resultado: monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
 
           return monthMatch && yearMatch;
         });
@@ -121,7 +109,6 @@ export default function TurnDistributionGraphic({ data, selectedMonths, selected
     // Filtrar por guardia seleccionada
     if (selectedGuardia !== "Todo") {
       filteredData = filteredData.filter((item: StatiticsData) => item.Guardia === selectedGuardia);
-      console.log(`Datos filtrados por guardia (${selectedGuardia}):`, filteredData);
     }
 
     return filteredData;
@@ -130,7 +117,6 @@ export default function TurnDistributionGraphic({ data, selectedMonths, selected
   const filteredData = getFilteredData();
   const processedData = processData(filteredData);
 
-  console.log("Datos procesados:", processedData);
 
   // Definir colores para los turnos
   const dayColor = "#34d399" // Verde para Día

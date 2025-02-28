@@ -35,7 +35,6 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
 
   const getGroupedData = () => {
     if (!data || data.length === 0) {
-      console.log("No hay datos disponibles para procesar.");
       return [];
     }
 
@@ -48,11 +47,6 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
           const weekMatch = item.Semana === w.week;
 
-          // Depuración para semanas
-          console.log(`Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs w.month=${w.month} (mapped: ${monthNumberToName(w.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Comparando: item.Semana=${item.Semana} vs w.week=${w.week}`);
-          console.log(`Comparando: item.Anual=${item.Anual} vs w.year=${w.year} (Number: ${Number(w.year)})`);
-          console.log(`Resultado: weekMatch=${weekMatch}, monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
 
           return weekMatch && monthMatch && yearMatch;
         });
@@ -63,8 +57,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           Avance_ejec: weeklyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
 
-        console.log(`Filtro para Semana: ${w.week}, Mes: ${w.month}, Año: ${w.year}`, weeklyData);
-        console.log("weekData:", weekData);
+
         return weekData;
       });
     } else if (selectedMonths.length > 0) {
@@ -75,10 +68,6 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           const yearMatch = item.Anual === Number(m.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
 
-          console.log(`Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs m.month=${m.month} (mapped: ${monthNumberToName(m.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Comparando: item.Anual=${item.Anual} vs m.year=${m.year} (Number: ${Number(m.year)})`);
-          console.log(`Resultado: monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
-
           return monthMatch && yearMatch;
         });
 
@@ -88,8 +77,6 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
 
-        console.log(`Filtro para Mes: ${m.month}, Año: ${m.year}`, monthlyData);
-        console.log("monthData:", monthData);
         return monthData;
       });
     } else {
@@ -103,8 +90,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           Avance_programado: monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
           Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
-        console.log(`Filtro por defecto para Mes: ${month}`, monthlyData);
-        console.log("monthData por defecto:", monthData);
+  
         return monthData;
       });
     }

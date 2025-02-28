@@ -67,13 +67,9 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
     return monthMap[monthNumber] || monthNumber; // Fallback al valor original si no hay coincidencia
   };
 
-  console.log("Datos de entrada (data):", data);
-  console.log("Semanas seleccionadas:", selectedWeeks);
-  console.log("Meses seleccionados:", selectedMonths);
 
   const getFilteredData = () => {
     if (!data || data.length === 0) {
-      console.log("No hay datos disponibles para procesar.");
       return data;
     }
 
@@ -86,10 +82,6 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
           const weekMatch = item.Semana === w.week;
 
-          console.log(`Filtro semana - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs w.month=${w.month} (mapped: ${monthNumberToName(w.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Filtro semana - Comparando: item.Semana=${item.Semana} vs w.week=${w.week}`);
-          console.log(`Filtro semana - Comparando: item.Anual=${item.Anual} vs w.year=${w.year} (Number: ${Number(w.year)})`);
-          console.log(`Filtro semana - Resultado: weekMatch=${weekMatch}, monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
 
           return weekMatch && monthMatch && yearMatch;
         });
@@ -101,10 +93,6 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
           const normalizedSelectedMonth = normalizeMonth(monthNumberToName(m.month));
           const yearMatch = item.Anual === Number(m.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
-
-          console.log(`Filtro mes - Comparando: item["Month Short"]=${item["Month Short"]} (normalized: ${normalizedItemMonth}) vs m.month=${m.month} (mapped: ${monthNumberToName(m.month)}, normalized: ${normalizedSelectedMonth})`);
-          console.log(`Filtro mes - Comparando: item.Anual=${item.Anual} vs m.year=${m.year} (Number: ${Number(m.year)})`);
-          console.log(`Filtro mes - Resultado: monthMatch=${monthMatch}, yearMatch=${yearMatch}`);
 
           return monthMatch && yearMatch;
         });
@@ -126,7 +114,7 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
     })
     .filter(item => item.value > 0);
 
-  console.log("Datos procesados:", processedData);
+
 
   // Si no hay datos procesados, mostrar un mensaje
   if (processedData.length === 0) {
