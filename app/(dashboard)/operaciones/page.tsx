@@ -14,7 +14,6 @@ import { Calendar, Check, Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-
 const months = [
     { name: "Jan", value: "01" },
     { name: "Feb", value: "02" },
@@ -35,10 +34,10 @@ export default function Operaciones() {
     const [activePeriod, setActivePeriod] = useState<"Mes" | "Semana">("Mes");
     const [selectedGuardia, setSelectedGuardia] = useState<"Día" | "Noche">("Día");
     const [selectedMonths, setSelectedMonths] = useState<{ month: string; year: string }[]>([]);
-    const [popoverOpen, setPopoverOpen] = useState(false);
+    const [selectedWeeks, setSelectedWeeks] = useState<{ week: string; month: string; year: string }[]>([]);
+    const [monthPopoverOpen, setMonthPopoverOpen] = useState(false);
+    const [weekPopoverOpen, setWeekPopoverOpen] = useState(false);
 
-
-    
     const fetchData = useCallback(async () => {
         try {
             const response = await getAllData();
@@ -47,6 +46,54 @@ export default function Operaciones() {
             console.error("Error al obtener los datos:", error);
         }
     }, []);
+
+    // Helper function to get unique months per year from data
+    const getAvailableMonthsByYear = useCallback(() => {
+        const yearMonthMap: { [key: string]: Set<string> } = {};
+        
+        data.forEach(item => {
+            const year = item.Anual?.toString();
+            const monthShort = item["Month Short"];
+            
+            if (year && monthShort) {
+                if (!yearMonthMap[year]) {
+                    yearMonthMap[year] = new Set();
+                }
+                yearMonthMap[year].add(monthShort);
+            }
+        });
+
+        return yearMonthMap;
+    }, [data]);
+
+    // Helper function to get unique weeks per month and year
+    const getAvailableWeeksByMonthAndYear = useCallback(() => {
+        const yearMonthWeekMap: { [key: string]: { [key: string]: Set<string> } } = {};
+        
+        data.forEach(item => {
+            const year = item.Anual?.toString();
+            const monthShort = item["Month Short"];
+            const week = item.Semana;
+            
+            if (year && monthShort && week) {
+                if (!yearMonthWeekMap[year]) {
+                    yearMonthWeekMap[year] = {};
+                }
+                if (!yearMonthWeekMap[year][monthShort]) {
+                    yearMonthWeekMap[year][monthShort] = new Set();
+                }
+                yearMonthWeekMap[year][monthShort].add(week);
+            }
+        });
+
+        return yearMonthWeekMap;
+    }, [data]);
+
+    // Convert month short name to value
+    const getMonthValue = (monthShort: string) => {
+        const month = months.find(m => m.name === monthShort);
+        return month?.value || "";
+    };
 
     useEffect(() => {
         fetchData();
@@ -59,16 +106,24 @@ export default function Operaciones() {
         });
     };
 
+    const toggleWeekSelection = (week: string, month: string, year: string) => {
+        setSelectedWeeks(prev => {
+            const exists = prev.some(w => w.week === week && w.month === month && w.year === year);
+            return exists 
+                ? prev.filter(w => !(w.week === week && w.month === month && w.year === year)) 
+                : [...prev, { week, month, year }];
+        });
+    };
+
     const currentYear = new Date().getFullYear();
     const years = [currentYear, currentYear - 1];
-
 
     return (
         <div className="flex flex-col gap-4 p-4 pb-[100px]">
             <div className="w-auto flex flex-col gap-4 py-4">
                 <Navbar />
                 <div className="inline-flex p-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg gap-1 max-w-fit-content">
-                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                    <Popover open={monthPopoverOpen} onOpenChange={setMonthPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
@@ -80,43 +135,118 @@ export default function Operaciones() {
                                 {selectedMonths.length > 0
                                     ? (() => {
                                         const text = selectedMonths.map(m => `${m.month}/${m.year}`).join(", ");
-                                        return text.length > 10 ? text.slice(0, 10) + "..." : text;
+                                        return text.length > 10 ? text.slice(0, 5) + "..." : text;
                                     })()
                                     : "Mes"}
                             </Button>
                         </PopoverTrigger>
 
-                        <PopoverContent className="w-60 bg-slate-900 p-2 rounded-md shadow-md text-slate-100 font-semibold">
-                            {years.map(year => (
-                                <div key={year} className="border-b border-slate-700 last:border-none pb-2 mb-2 last:pb-0 last:mb-0">
-                                    <p className="text-sm text-slate-400 mb-1">{year}</p>
-                                    {months.map(({ name, value }) => (
-                                        <button
-                                            key={value}
-                                            className={`flex items-center justify-between w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${selectedMonths.some(m => m.month === value && m.year === year.toString()) ? "bg-slate-700" : ""
-                                                }`}
-                                            onClick={() => toggleMonthSelection(value, year.toString())}
-                                        >
-                                            {name}
-                                            {selectedMonths.some(m => m.month === value && m.year === year.toString()) && (
-                                                <Check className="w-4 h-4 text-green-400" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            ))}
+                        <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
+                            {years.map(year => {
+                                const availableMonths = getAvailableMonthsByYear()[year.toString()];
+                                if (!availableMonths || availableMonths.size === 0) return null;
+
+                                const monthArray = Array.from(availableMonths);
+                                const monthGroups = [];
+                                for (let i = 0; i < monthArray.length; i += 4) {
+                                    monthGroups.push(monthArray.slice(i, i + 4));
+                                }
+
+                                return (
+                                    <div key={year} className="border-b border-slate-700 last:border-none pb-4 mb-4 last:pb-0 last:mb-0">
+                                        <p className="text-sm text-slate-400 mb-2">{year}</p>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {monthGroups.map((group, groupIndex) => (
+                                                group.map((monthShort) => {
+                                                    const monthValue = getMonthValue(monthShort);
+                                                    const isSelected = selectedMonths.some(
+                                                        m => m.month === monthValue && m.year === year.toString()
+                                                    );
+
+                                                    return (
+                                                        <button
+                                                            key={`${year}-${monthShort}`}
+                                                            className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${
+                                                                isSelected ? "bg-slate-700" : ""
+                                                            }`}
+                                                            onClick={() => toggleMonthSelection(monthValue, year.toString())}
+                                                        >
+                                                            <span>{monthShort}</span>
+                                                            {isSelected && (
+                                                                <Check className="w-4 h-4 text-green-400 ml-1" />
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </PopoverContent>
                     </Popover>
 
-                    <Button
-                        variant="ghost"
-                        className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Semana" ? "bg-[#0EA5E9]/20 text-[#0EA5E9]" : "text-slate-400"
-                            }`}
-                        onClick={() => setActivePeriod("Semana")}
-                    >
-                        <Calendar className="w-4 h-4" />
-                        Semana
-                    </Button>
+                    <Popover open={weekPopoverOpen} onOpenChange={setWeekPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className={`px-4 py-2 transition-all duration-300 gap-2 ${activePeriod === "Semana" ? "bg-[#0EA5E9]/20 text-[#0EA5E9]" : "text-slate-400"
+                                    }`}
+                                onClick={() => setActivePeriod("Semana")}
+                            >
+                                <Calendar className="w-4 h-4" />
+                                {selectedWeeks.length > 0
+                                    ? (() => {
+                                        const text = selectedWeeks.map(w => `${w.week} ${w.month}/${w.year}`).join(", ");
+                                        return text.length > 10 ? text.slice(0, 5) + "..." : text;
+                                    })()
+                                    : "Semana"}
+                            </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-80 bg-slate-900 p-4 rounded-md shadow-md text-slate-100 font-semibold">
+                            {years.map(year => {
+                                const availableMonths = getAvailableWeeksByMonthAndYear()[year.toString()];
+                                if (!availableMonths) return null;
+
+                                return (
+                                    <div key={year} className="border-b border-slate-700 last:border-none pb-4 mb-4 last:pb-0 last:mb-0">
+                                        <p className="text-sm text-slate-400 mb-2">{year}</p>
+                                        {Object.entries(availableMonths).map(([monthShort, weeks]) => {
+                                            const weekArray = Array.from(weeks);
+                                            return (
+                                                <div key={`${year}-${monthShort}`} className="mb-2">
+                                                    <p className="text-xs text-slate-500 mb-1">{monthShort}</p>
+                                                    <div className="grid grid-cols-4 gap-2">
+                                                        {weekArray.map(week => {
+                                                            const monthValue = getMonthValue(monthShort);
+                                                            const isSelected = selectedWeeks.some(
+                                                                w => w.week === week && w.month === monthValue && w.year === year.toString()
+                                                            );
+                                                            return (
+                                                                <button
+                                                                    key={`${year}-${monthShort}-${week}`}
+                                                                    className={`flex items-center justify-center w-full text-left text-sm px-2 py-1 rounded-md hover:bg-slate-700 ${
+                                                                        isSelected ? "bg-slate-700" : ""
+                                                                    }`}
+                                                                    onClick={() => toggleWeekSelection(week, monthValue, year.toString())}
+                                                                >
+                                                                    <span>{week}</span>
+                                                                    {isSelected && (
+                                                                        <Check className="w-4 h-4 text-green-400 ml-1" />
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </PopoverContent>
+                    </Popover>
 
                     <Button
                         variant="ghost"
