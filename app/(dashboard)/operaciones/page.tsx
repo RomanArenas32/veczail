@@ -39,7 +39,6 @@ export default function Operaciones() {
     const [selectedWeeks, setSelectedWeeks] = useState<week[]>([]);
     const [monthPopoverOpen, setMonthPopoverOpen] = useState(false);
     const [weekPopoverOpen, setWeekPopoverOpen] = useState(false);
-    const [filterData, setFilterData] = useState<StatiticsData[]>([]);
 
 
 
@@ -299,7 +298,7 @@ export default function Operaciones() {
             <CardOnboarding data={data} />
 
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
-                <ProgressOperationGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
+                <ProgressOperationGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths} selectedGuardia={effectiveGuardia}/>
                 <TurnDistrubutionGraphic data={data} selectedGuardia={effectiveGuardia} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
                 <CurrentSteelsGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>
                 <CurrentExplosivesGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths}/>

@@ -8,13 +8,13 @@ import { Month, StatiticsData, week } from "@/models/api"
 type Data = {
   selectedMonths: Month[] | [],
   selectedWeeks: week[] | [],
-  data: StatiticsData[] | []
+  data: StatiticsData[] | [],
+  selectedGuardia: 'Día' | 'Noche' | 'Todo'
 }
 
-export default function ProgressOperationGraphic({ data, selectedMonths, selectedWeeks }: Data) {
+export default function ProgressOperationGraphic({ data, selectedMonths, selectedWeeks, selectedGuardia }: Data) {
   const normalizeMonth = (month: string) => month.slice(0, 3).toLowerCase();
 
-  // Mapeo de números de mes a nombres abreviados
   const monthNumberToName = (monthNumber: string) => {
     const monthMap: { [key: string]: string } = {
       "01": "Jan",
@@ -30,7 +30,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
       "11": "Nov",
       "12": "Dec"
     };
-    return monthMap[monthNumber] || monthNumber; // Fallback al valor original si no hay coincidencia
+    return monthMap[monthNumber] || monthNumber;
   };
 
   const getGroupedData = () => {
@@ -38,31 +38,31 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
       return [];
     }
 
+    const filteredData = selectedGuardia === 'Todo' 
+      ? data 
+      : data.filter(item => item.Guardia === selectedGuardia);
+
     if (selectedWeeks.length > 0) {
       return selectedWeeks.map(w => {
-        const weeklyData = data.filter((item: StatiticsData) => {
+        const weeklyData = filteredData.filter((item: StatiticsData) => {
           const normalizedItemMonth = normalizeMonth(item["Month Short"]);
           const normalizedSelectedMonth = normalizeMonth(monthNumberToName(w.month));
           const yearMatch = item.Anual === Number(w.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
           const weekMatch = item.Semana === w.week;
 
-
           return weekMatch && monthMatch && yearMatch;
         });
 
-        const weekData = {
+        return {
           name: `Sem ${w.week} ${w.month} ${w.year}`,
           Avance_programado: weeklyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
           Avance_ejec: weeklyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
-
-
-        return weekData;
       });
     } else if (selectedMonths.length > 0) {
       return selectedMonths.map(m => {
-        const monthlyData = data.filter((item: StatiticsData) => {
+        const monthlyData = filteredData.filter((item: StatiticsData) => {
           const normalizedItemMonth = normalizeMonth(item["Month Short"]);
           const normalizedSelectedMonth = normalizeMonth(monthNumberToName(m.month));
           const yearMatch = item.Anual === Number(m.year);
@@ -71,27 +71,23 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           return monthMatch && yearMatch;
         });
 
-        const monthData = {
+        return {
           name: `${m.month} ${m.year}`,
           Avance_programado: monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
           Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
-
-        return monthData;
       });
     } else {
       const monthsOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return monthsOrder.map(month => {
-        const monthlyData = data.filter((item: StatiticsData) => 
+        const monthlyData = filteredData.filter((item: StatiticsData) => 
           normalizeMonth(item["Month Short"]) === normalizeMonth(month)
         );
-        const monthData = {
+        return {
           name: month,
           Avance_programado: monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
           Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
         };
-  
-        return monthData;
       });
     }
   };
@@ -104,7 +100,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="flex items-center gap-2">
             <MoveUpRight className="h-5 w-5 text-purple-400" />
-            <CardTitle className="text-xl font-medium text-purple-400">Progreso Operaciones</CardTitle>
+            <CardTitle className="text-xl font-medium text-purple-400">Progreso Operaciones {`(${selectedGuardia})`}</CardTitle>
           </div>
           <ArrowUpRight className="h-5 w-5 text-gray-400" />
         </CardHeader>
@@ -122,7 +118,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <MoveUpRight className="h-5 w-5 text-purple-400" />
-          <CardTitle className="text-xl font-medium text-purple-400">Progreso Operaciones</CardTitle>
+          <CardTitle className="text-xl font-medium text-purple-400">Progreso Operaciones {`(${selectedGuardia})`}</CardTitle>
         </div>
         <ArrowUpRight className="h-5 w-5 text-gray-400" />
       </CardHeader>
