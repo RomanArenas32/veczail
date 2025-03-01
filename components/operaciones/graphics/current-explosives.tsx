@@ -114,6 +114,7 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
     })
     .filter(item => item.value > 0);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
 
   // Si no hay datos procesados, mostrar un mensaje
@@ -153,32 +154,37 @@ export default function CurrentExplosivesGraphic({ data, selectedMonths, selecte
           <BarChart
             data={processedData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+            margin={{
+              top: 5,
+              right: isMobile ? 10 : 30, // Reduce right margin on mobile
+              left: isMobile ? 80 : 120, // Reduce left margin on mobile
+              bottom: 5,
+            }}
           >
-            <CartesianGrid 
-              horizontal={false} 
-              stroke="#334155" 
-              strokeDasharray="3 3" 
+            <CartesianGrid
+              horizontal={false}
+              stroke="#334155"
+              strokeDasharray="3 3"
             />
             <XAxis
               type="number"
               domain={[0, 'dataMax']}
               tickCount={5}
-              tick={{ fill: "#94a3b8" }}
+              tick={{ fill: "#94a3b8", fontSize: isMobile ? 10 : 12 }}
               axisLine={{ stroke: "#334155" }}
               tickLine={{ stroke: "#334155" }}
             />
             <YAxis
               type="category"
               dataKey="name"
-              width={120}
-              tick={{ fill: "#94a3b8" }}
+              width={isMobile ? 6 : 120}
+              tick={{ fill: "#94a3b8", fontSize: isMobile ? 10 : 12 }}
               axisLine={{ stroke: "#334155" }}
               tickLine={false}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1e293b', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1e293b',
                 border: 'none',
                 borderRadius: '4px',
                 color: '#fff'

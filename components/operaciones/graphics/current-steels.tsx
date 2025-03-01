@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import {
@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { Hammer, ExternalLink } from 'lucide-react';
+import { Hammer, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Month, StatiticsData, week } from "@/models/api";
 
@@ -25,19 +25,18 @@ const relevantFields = [
   "Cuadro resumen B.I4",
   "Cuadro resumen B.I5",
   "Cuadro resumen B.I6",
-  "Cuadro resumen BROCAS 38"
+  "Cuadro resumen BROCAS 38",
 ];
 
 type Data = {
-  selectedMonths: Month[] | [],
-  selectedWeeks: week[] | [],
-  data: any[] | []
-}
+  selectedMonths: Month[] | [];
+  selectedWeeks: week[] | [];
+  data: any[] | [];
+};
 
 export default function CurrentSteelsGraphic({ data, selectedMonths, selectedWeeks }: Data) {
   const normalizeMonth = (month: string) => month.slice(0, 3).toLowerCase();
 
-  // Mapeo de números de mes a nombres abreviados
   const monthNumberToName = (monthNumber: string) => {
     const monthMap: { [key: string]: string } = {
       "01": "Jan",
@@ -51,73 +50,65 @@ export default function CurrentSteelsGraphic({ data, selectedMonths, selectedWee
       "09": "Sep",
       "10": "Oct",
       "11": "Nov",
-      "12": "Dec"
+      "12": "Dec",
     };
-    return monthMap[monthNumber] || monthNumber; // Fallback al valor original si no hay coincidencia
+    return monthMap[monthNumber] || monthNumber;
   };
-
-
 
   const getFilteredData = () => {
     if (!data || data.length === 0) {
-
       return data;
     }
 
     if (selectedWeeks.length > 0) {
       return data.filter((item: StatiticsData) => {
-        return selectedWeeks.some(w => {
+        return selectedWeeks.some((w) => {
           const normalizedItemMonth = normalizeMonth(item["Month Short"]);
           const normalizedSelectedMonth = normalizeMonth(monthNumberToName(w.month));
           const yearMatch = item.Anual === Number(w.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
           const weekMatch = item.Semana === w.week;
 
-
           return weekMatch && monthMatch && yearMatch;
         });
       });
     } else if (selectedMonths.length > 0) {
       return data.filter((item: StatiticsData) => {
-        return selectedMonths.some(m => {
+        return selectedMonths.some((m) => {
           const normalizedItemMonth = normalizeMonth(item["Month Short"]);
           const normalizedSelectedMonth = normalizeMonth(monthNumberToName(m.month));
           const yearMatch = item.Anual === Number(m.year);
           const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
 
-
           return monthMatch && yearMatch;
         });
       });
     }
-    return data; // Si no hay filtros, devolver todos los datos
+    return data;
   };
 
   const filteredData = getFilteredData();
 
-  // Process the data to sum the relevant fields and filter out zeros
   const processedData = relevantFields
     .map((field) => {
       const sum = filteredData.reduce((acc, curr) => acc + (curr[field] || 0), 0);
       return {
         name: field,
-        value: sum
+        value: sum,
       };
     })
-    .filter(item => item.value > 0);
+    .filter((item) => item.value > 0);
 
+  // Determine if the screen is small (e.g., mobile)
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
-
-  // Si no hay datos procesados, mostrar un mensaje
   if (processedData.length === 0) {
     return (
       <Card className="w-full bg-[#111827] text-white border-none p-4">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Hammer className="h-5 w-5 text-[#FFA500]" />
-            <h2 className="text-xl font-medium text-[#FFA500]">
-              Actual Aceros
-            </h2>
+            <h2 className="text-xl font-medium text-[#FFA500]">Actual Aceros</h2>
           </div>
           <ExternalLink className="h-5 w-5 text-gray-400" />
         </div>
@@ -133,9 +124,7 @@ export default function CurrentSteelsGraphic({ data, selectedMonths, selectedWee
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Hammer className="h-5 w-5 text-[#FFA500]" />
-          <h2 className="text-xl font-medium text-[#FFA500]">
-            Actual Aceros
-          </h2>
+          <h2 className="text-xl font-medium text-[#FFA500]">Actual Aceros</h2>
         </div>
         <ExternalLink className="h-5 w-5 text-gray-400" />
       </div>
@@ -145,40 +134,49 @@ export default function CurrentSteelsGraphic({ data, selectedMonths, selectedWee
           <BarChart
             data={processedData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+            margin={{
+              top: 5,
+              right: isMobile ? 10 : 30, // Reduce right margin on mobile
+              left: isMobile ? 80 : 120, // Reduce left margin on mobile
+              bottom: 5,
+            }}
           >
-            <CartesianGrid horizontal={false} stroke="#334155" strokeDasharray="3 3" />
+            <CartesianGrid
+              horizontal={false}
+              stroke="#334155"
+              strokeDasharray="3 3"
+            />
             <XAxis
               type="number"
-              domain={[0, 'dataMax']}
+              domain={[0, "dataMax"]}
               tickCount={5}
-              tick={{ fill: "#94a3b8" }}
+              tick={{ fill: "#94a3b8", fontSize: isMobile ? 10 : 12 }} // Smaller font on mobile
               axisLine={{ stroke: "#334155" }}
               tickLine={{ stroke: "#334155" }}
             />
             <YAxis
               type="category"
               dataKey="name"
-              width={120}
-              tick={{ fill: "#94a3b8" }}
+              width={isMobile ? 6 : 120} // Reduce Y-axis width on mobile
+              tick={{ fill: "#94a3b8", fontSize: isMobile ? 10 : 12 }} // Smaller font on mobile
               axisLine={{ stroke: "#334155" }}
               tickLine={false}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1e293b', 
-                border: 'none',
-                borderRadius: '4px',
-                color: '#fff'
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#1e293b",
+                border: "none",
+                borderRadius: "4px",
+                color: "#fff",
               }}
-              cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
             />
             <Bar
               dataKey="value"
               fill="#FFA500"
               background={{ fill: "transparent" }}
               radius={[0, 4, 4, 0]}
-              barSize={20}
+              barSize={isMobile ? 15 : 20} // Smaller bars on mobile
             />
           </BarChart>
         </ResponsiveContainer>

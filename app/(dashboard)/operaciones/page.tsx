@@ -280,22 +280,22 @@ export default function Operaciones() {
                         onClick={() => toggleGuardia("Día")}
                     >
                         <Sun className="w-4 h-4" />
-                        Día
+                        D
                     </Button>
 
                     <Button
                         variant="ghost"
-                        className={`px-4 py-2 transition-all duration-300 gap-2 ${guardiaSelection.Noche ? "bg-[#1A1F2C]/50 text-slate-300" : "text-slate-400"}`}
+                        className={`px-4 py-2 transition-all duration-300 gap-2 ${guardiaSelection.Noche ? "bg-[#F97316]/20 text-slate-300" : "text-slate-400"}`}
                         onClick={() => toggleGuardia("Noche")}
                     >
                         <Moon className="w-4 h-4" />
-                        Noche
+                        N
                     </Button>
                 </div>
             </div>
 
             <CardProgress selectedGuardia={effectiveGuardia} data={data} />
-            <CardOnboarding data={data} />
+            <CardOnboarding data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths} selectedGuardia={effectiveGuardia} />
 
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
                 <ProgressOperationGraphic data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths} selectedGuardia={effectiveGuardia}/>
