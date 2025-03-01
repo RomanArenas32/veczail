@@ -2,7 +2,7 @@
 
 import { StatiticsData } from "@/models/api";
 
-const WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL as string;
+const WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URLL as string;
 
 export async function getAllData(): Promise<StatiticsData[]> {
     try {
