@@ -15,7 +15,6 @@ import { Card } from "@/components/ui/card";
 import { Month, StatiticsData, week } from "@/models/api";
 
 const relevantFields = [
-  "Cordon detonante 5P",
   "Cuadro resumen B.C3",
   "Cuadro resumen B.C4",
   "Cuadro resumen B.C5",
