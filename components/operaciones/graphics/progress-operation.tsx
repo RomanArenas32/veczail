@@ -56,8 +56,8 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
 
         return {
           name: `Sem ${w.week} ${w.month} ${w.year}`,
-          Avance_programado: weeklyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
-          Avance_ejec: weeklyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
+          Avance_programado: Number(weeklyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0).toFixed(2)),
+          Avance_ejec: Number(weeklyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0).toFixed(2)),
         };
       });
     } else if (selectedMonths.length > 0) {
@@ -73,8 +73,8 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
 
         return {
           name: `${m.month} ${m.year}`,
-          Avance_programado: monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
-          Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
+          Avance_programado: Number(monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0).toFixed(2)),
+          Avance_ejec: Number(monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0).toFixed(2)),
         };
       });
     } else {
@@ -85,8 +85,8 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
         );
         return {
           name: month,
-          Avance_programado: monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0),
-          Avance_ejec: monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0),
+          Avance_programado: Number(monthlyData.reduce((sum, item) => sum + (item.Avance_programado || 0), 0).toFixed(2)),
+          Avance_ejec: Number(monthlyData.reduce((sum, item) => sum + (item.Avance_ejec || 0), 0).toFixed(2)),
         };
       });
     }
@@ -104,7 +104,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
           </div>
           <ArrowUpRight className="h-5 w-5 text-gray-400" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0">
           <div className="h-[400px] flex items-center justify-center">
             <p className="text-gray-400">No hay datos disponibles para mostrar.</p>
           </div>
@@ -122,7 +122,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
         </div>
         <ArrowUpRight className="h-5 w-5 text-gray-400" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0 lg:px-1">
         <div className="h-[400px] p-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -145,6 +145,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
                 stroke="#666"
                 tick={{ fill: "#999" }}
                 axisLine={{ stroke: "#333" }}
+                tickFormatter={(value) => value.toFixed(2)} // Truncate Y-axis labels to 2 decimals
               />
               <Tooltip
                 contentStyle={{
@@ -153,6 +154,7 @@ export default function ProgressOperationGraphic({ data, selectedMonths, selecte
                   borderRadius: "8px",
                   color: "#fff",
                 }}
+                formatter={(value: number) => value.toFixed(2)} // Truncate tooltip values to 2 decimals
               />
               <Legend
                 verticalAlign="bottom"
