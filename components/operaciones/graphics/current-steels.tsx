@@ -135,8 +135,8 @@ export default function CurrentSteelsGraphic({ data, selectedMonths, selectedWee
             layout="vertical"
             margin={{
               top: 5,
-              right: isMobile ? 10 : 30, // Reduce right margin on mobile
-              left: isMobile ? 80 : 120, // Reduce left margin on mobile
+              right: isMobile ? 10 : 20, // Reduce right margin on mobile
+              left: isMobile ? 60 : 20, // Reduce left margin on mobile
               bottom: 5,
             }}
           >
