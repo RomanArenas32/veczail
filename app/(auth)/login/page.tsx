@@ -14,6 +14,7 @@ import { signInSchema } from "@/schemma/auth";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const AuthForm = () => {
   const { toast } = useToast();
@@ -30,19 +31,16 @@ const AuthForm = () => {
     },
   });
 
+  
+    const router = useRouter(); // Hook usado correctamente en el componente
+
   async function onSubmit(values: z.infer<typeof signInSchema>) {
-    /*const error = await signInActionSuperadmin({
-        usernameOrEmail: values.usernameOrEmail,
-        password: values.password,
-    });
-    if (error) {
-        toast({
-            variant: "destructive",
-            title: error.error,
-            description: error.message,
-            duration: 4000,
-        });
-    }*/
+    try {
+      console.log('Valores:', values);
+      router.push('/operaciones'); // Usa el router del scope superior
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
   return (
@@ -106,7 +104,7 @@ const AuthForm = () => {
                 <Separator className="shrink" />
               </div>
             </div>
-            <Button type="submit" size={"lg"} className="w-full  text-white" disabled={form.formState.isSubmitting}>
+            <Button type="submit" size={"lg"} className="w-full  text-white font-bold hover:cursor-pointer" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />} Ingresar
             </Button>
           </form>
