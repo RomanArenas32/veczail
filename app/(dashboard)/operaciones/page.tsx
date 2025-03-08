@@ -150,9 +150,9 @@ export default function Operaciones() {
     return (
         <div className="flex flex-col gap-4 p-4 pb-[100px]">
             <div className="w-auto flex flex-col gap-4 py-4">
-                <Navbar />
-                <div className="h-8"></div>
-                <div className="inline-flex p-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg gap-1 max-w-fit-content fixed mt-12 z-10">
+               
+                
+                <div className="inline-flex p-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg gap-1 max-w-fit-content fixed  z-10">
                     <Popover open={monthPopoverOpen} onOpenChange={setMonthPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button
@@ -293,6 +293,8 @@ export default function Operaciones() {
                         N
                     </Button>
                 </div>
+                <div className="h-9"></div>
+                <Navbar />
             </div>
 
             <CardProgress selectedGuardia={effectiveGuardia} data={data} />
