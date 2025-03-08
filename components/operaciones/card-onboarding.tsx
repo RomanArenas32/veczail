@@ -84,7 +84,7 @@ export default function CardOnboarding({ data, selectedWeeks, selectedGuardia, s
             color: "#1d3f4f",
         },
         {
-            title: "????????????",
+            title: "Cumpliento",
             value: filteredData.length === 0 
                 ? "0" 
                 : `${(filteredData.reduce((sum, item) => sum + (typeof item["Avance (%)"] === 'number' ? item["Avance (%)"] : 0), 0) / filteredData.length * 100).toFixed(1)}%`,
