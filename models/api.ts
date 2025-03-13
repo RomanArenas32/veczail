@@ -50,3 +50,14 @@ export interface Month {
   month: string;
   year: string;
 }
+
+export enum Role {
+  ADMIN = 'ADMIN',
+}
+
+export enum Area {
+  RRHH = 'RRHH',
+  CONTABILIDAD = 'CONTABILIDAD',
+  OPERACIONES = 'OPERACIONES',
+  GERENCIA = 'GERENCIA',
+}
