@@ -10,11 +10,10 @@ const publicRoutes = [
   "/reset-password",
   "/404",
   "/500",
-  "/",
 ];
 
 const roleRoutes = {
-  [Role.ADMIN]: ["/operaciones"],
+  [Role.ADMIN]: ["/operaciones", "/rrhh", "/contabilidad", "/settings", "/"],
 };
 
 export default async function middleware(request: NextRequest) {
