@@ -31,16 +31,13 @@ const AuthForm = () => {
 
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
-    console.log("Submitting:", values); // Verifica los valores enviados
     const result = await signInAction({
       usernameOrEmail: values.usernameOrEmail,
       password: values.password,
     });
-    console.log("Result from signInAction:", result); // Verifica el resultado
     setIsLoading(false);
   
     if (result?.error) {
-      console.log("Error:", result);
       toast({
         variant: "destructive",
         title: result.error,
@@ -48,11 +45,8 @@ const AuthForm = () => {
         duration: 4000,
       });
     } else if (result?.success) {
-      console.log("Success, redirecting to:", result.redirectTo);
       router.push(result.redirectTo.toString()); // Debería redirigir aquí
-      console.log("After router.push"); // Verifica si se ejecuta
     } else {
-      console.log("Unexpected result:", result); // Caso inesperado
     }
   }
 

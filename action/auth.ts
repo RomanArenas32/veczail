@@ -18,8 +18,6 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       password: data.password,
     };
     const url = `${API_URL}/user/login`;
-    console.log('API_URL:', API_URL);
-    console.log('Full URL:', url);
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
@@ -38,7 +36,6 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
     }
 
     const body = await response.json();
-    console.log("response", body);
 
     const user = { ...body.user };
     const session: SessionData = {

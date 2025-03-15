@@ -30,7 +30,6 @@ export default async function middleware(request: NextRequest) {
   }
 
   if (!session.isLoggedIn) {
-    console.log("No session, redirecting to /login");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -48,7 +47,6 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  console.log("Role mismatch or route not allowed, redirecting to /login");
   return NextResponse.redirect(new URL("/login", request.url));
 }
 
