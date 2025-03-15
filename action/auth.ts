@@ -1,16 +1,15 @@
 "use server";
 
 import { z } from "zod";
-import {  saveSession } from "@/lib/auth";
+import { saveSession } from "@/lib/auth";
 import { API_URL } from "@/lib/consts";
 import { signInSchema } from "@/schemma/auth";
 
-
 export type SessionData = {
-    user?: any;
-    jwt?: string;
-    isLoggedIn: boolean;
-  };
+  user?: any;
+  jwt?: string;
+  isLoggedIn: boolean;
+};
 
 export async function signInAction(data: z.infer<typeof signInSchema>) {
   try {
@@ -19,6 +18,8 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       password: data.password,
     };
     const url = `${API_URL}/user/login`;
+    console.log('API_URL:', API_URL);
+    console.log('Full URL:', url);
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
@@ -26,26 +27,44 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       },
       body: JSON.stringify(payload),
     });
-    const body = (await response.json());
-    
 
-    
-    const user = {
-      ...body.user,
-    };
+    if (!response.ok) {
+      const errorBody = await response.json();
+      return {
+        error: errorBody.error || "Request Failed",
+        message: errorBody.message || "There was a problem with your request",
+        statusCode: response.status,
+      };
+    }
+
+    const body = await response.json();
+    console.log("response", body);
+
+    const user = { ...body.user };
     const session: SessionData = {
       isLoggedIn: true,
       user: user,
       jwt: body.jwt,
     };
     await saveSession(session);
-  } catch (error) {
+
+    return {
+      success: true,
+      redirectTo: "/",
+    };
+  } catch (error: any) {
     console.error("Unhandled sign in Error :", error);
+    if (error.cause?.code === "ECONNREFUSED") {
+      return {
+        error: "Connection Refused",
+        message: "Could not connect to the server. Is it running?",
+        statusCode: 503,
+      };
+    }
     return {
       error: "Uh oh! Something went wrong.",
       message: "There was a problem with your request.",
       statusCode: 500,
     };
   }
-  return null;
 }

@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export default function Footer() {
   const menuItems = [
-    { icon: BarChart, label: "Operaciones", path: "/operaciones" },
-    { icon: Users, label: "RRHH", path: "/operaciones" },
-    { icon: DollarSign, label: "Contabilidad", path: "/operaciones" },
-    { icon: Settings, label: "Settings", path: "/operaciones" },
+    { icon: BarChart, label: "Operaciones", path: "/" },
+    { icon: Users, label: "RRHH", path: "/rrhh" },
+    { icon: DollarSign, label: "Contabilidad", path: "/contabilidad" },
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800  z-50">
