@@ -1,20 +1,15 @@
 "use client"
-import { Button } from "@/components/common/ui/button";
+import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { DropdownMenuItem } from "../common/ui/dropdown-menu";
-import { signOutAction } from "@/actions/auth";
-import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { signOutAction } from "@/action/auth";
 
 export default function SignOutButton() {
-  const params = useParams();
-  const key = Array.isArray(params.key) ? params.key[0] : params.key;
 
   return (
     <Button
       size={"icon"}
       onClick={async () => {
-        await signOutAction(key);
+        await signOutAction();
       }}
       className="size-12 bg-white/10"
     >
@@ -23,19 +18,21 @@ export default function SignOutButton() {
   );
 }
 
-export function SignOutDropdownItem() {
-  const t = useTranslations('navbar');
+export function SignOutItem() {
 
-  const params = useParams();
-  const key = Array.isArray(params.key) ? params.key[0] : params.key;
 
   return (
-    <DropdownMenuItem
-      onClick={async () => await signOutAction(key)}
-      className="cursor-pointer"
-    >
-      <LogOut className="mr-2 h-4 w-4" />
-      <span>{t("logout")}</span>
-    </DropdownMenuItem>
+    <div className="flex items-center space-x-2">
+      <LogOut size={16} color="white" />
+      <Button
+        size={"sm"}
+        onClick={async () => {
+          await signOutAction();
+        }}
+        className="text-white"
+      >
+        Salir
+      </Button>
+    </div>
   );
 }

@@ -1,23 +1,19 @@
-
 import AdminHome from "@/components/admin/home";
 import { getSession } from "@/lib/auth";
 import { Role } from "@/models/api";
-import { redirect } from "@/components/navigation/";
+import { notFound } from "next/navigation";
 
-export default async function Page({
-  params
-}: {
-  params: { key: string; locale: string }
-}) {
+// Forzar renderizado dinámico en el servidor
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
   const session = await getSession();
-  switch (session.user?.role) {
-    case Role.ADMIN:
-      return <AdminHome />;
-    
-    default:
-      redirect({
-        href: `/404`,
-        locale: ""
-      });
-    }
+  
+  // Verifica si el usuario tiene rol ADMIN
+  if (session.user?.role !== Role.ADMIN) {
+    notFound(); // Redirige a la página 404 si el rol no es ADMIN
   }
+
+  // Si el rol es ADMIN, renderiza la página del admin
+  return <AdminHome />;
+}

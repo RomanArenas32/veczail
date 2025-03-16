@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { saveSession } from "@/lib/auth";
+import { getSession, saveSession } from "@/lib/auth";
 import { API_URL } from "@/lib/consts";
 import { signInSchema } from "@/schemma/auth";
 
@@ -64,4 +64,9 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       statusCode: 500,
     };
   }
+}
+
+export async function signOutAction() {
+  const session = await getSession();
+  await saveSession({ isLoggedIn: false });
 }
