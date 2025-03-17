@@ -39,7 +39,7 @@ export default function Footer() {
                 key={item.label}
                 onClick={handleLogout}
                 className={cn(
-                  "flex flex-col items-center text-red-500 hover:text-red-400 transition-colors",
+                  "flex flex-col items-center text-red-500 hover:text-red-400 hover:cursor-pointer transition-colors",
                   "p-2 rounded-lg"
                 )}
               >
