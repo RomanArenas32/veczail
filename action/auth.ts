@@ -25,7 +25,6 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
       },
       body: JSON.stringify(payload),
     });
-
     if (!response.ok) {
       const errorBody = await response.json();
       return {
@@ -69,4 +68,8 @@ export async function signInAction(data: z.infer<typeof signInSchema>) {
 export async function signOutAction() {
   const session = await getSession();
   await saveSession({ isLoggedIn: false });
-}
+  return {
+    success: true,
+    redirectTo: "/login",
+  };
+} 

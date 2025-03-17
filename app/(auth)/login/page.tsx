@@ -35,6 +35,7 @@ const AuthForm = () => {
       usernameOrEmail: values.usernameOrEmail,
       password: values.password,
     });
+    console.log("result", result);
     setIsLoading(false);
   
     if (result?.error) {

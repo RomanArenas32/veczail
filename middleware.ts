@@ -21,7 +21,7 @@ export default async function middleware(request: NextRequest) {
 
   // Llama a getSession directamente
   const session = await getSession(); // No necesitas pasar request si no lo requiere getSession
-
+console.log(session)
   // Verifica si la ruta es pública
   const isPublicRoute = publicRoutes.some(
     (route) => pathname.startsWith(route) || pathname === route

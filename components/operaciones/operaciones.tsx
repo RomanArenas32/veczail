@@ -297,7 +297,7 @@ export default function Operaciones() {
                 <Navbar />
             </div>
 
-            <CardProgress selectedGuardia={effectiveGuardia} data={data} />
+            <CardProgress selectedGuardia={effectiveGuardia} data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths} />
             <CardOnboarding data={data} selectedWeeks={selectedWeeks} selectedMonths={selectedMonths} selectedGuardia={effectiveGuardia} />
 
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">

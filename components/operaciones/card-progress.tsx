@@ -1,15 +1,68 @@
 "use client"
 
-import { StatiticsData } from "@/models/api";
+import { Month, StatiticsData, week } from "@/models/api";
 import { CircleIcon } from "lucide-react"
 
-export default function CardProgress({ selectedGuardia, data }: { selectedGuardia?: string, data: StatiticsData[] }) {
+type Data = {
+    data: StatiticsData[];
+    selectedWeeks: week[];
+    selectedMonths: Month[];
+    selectedGuardia: string; 
+}
+
+export default function CardProgress({ data, selectedWeeks, selectedGuardia, selectedMonths }: Data) {
   if (!data) return null; // Evita errores si data es undefined
 
-  // Filtrar datos según la guardia seleccionada o traer todos si es "Todo" o no hay filtro
-  const filteredData = selectedGuardia && selectedGuardia !== "Todo"
-    ? data.filter(item => item.Guardia === selectedGuardia)
-    : data;
+  const normalizeMonth = (month: string) => month.slice(0, 3).toLowerCase();
+
+  const monthNumberToName = (monthNumber: string) => {
+    const monthMap: { [key: string]: string } = {
+      "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", "06": "Jun",
+      "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+    };
+    return monthMap[monthNumber] || monthNumber;
+  };
+
+  const getFilteredData = () => {
+    let filteredData = data;
+
+    // Filter by selected weeks
+    if (selectedWeeks.length > 0) {
+      filteredData = filteredData.filter((item: StatiticsData) => {
+        return selectedWeeks.some(w => {
+          const normalizedItemMonth = normalizeMonth(item["Month Short"]);
+          const normalizedSelectedMonth = normalizeMonth(monthNumberToName(w.month));
+          const yearMatch = item.Anual === Number(w.year);
+          const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
+          const weekMatch = item.Semana === w.week;
+
+          return weekMatch && monthMatch && yearMatch;
+        });
+      });
+    }
+    // Filter by selected months
+    else if (selectedMonths.length > 0) {
+      filteredData = filteredData.filter((item: StatiticsData) => {
+        return selectedMonths.some(m => {
+          const normalizedItemMonth = normalizeMonth(item["Month Short"]);
+          const normalizedSelectedMonth = normalizeMonth(monthNumberToName(m.month));
+          const yearMatch = item.Anual === Number(m.year);
+          const monthMatch = normalizedItemMonth === normalizedSelectedMonth;
+
+          return monthMatch && yearMatch;
+        });
+      });
+    }
+
+    // Filter by selected shift (guardia)
+    if (selectedGuardia !== "Todo") {
+      filteredData = filteredData.filter((item: StatiticsData) => item.Guardia === selectedGuardia);
+    }
+
+    return filteredData;
+  };
+
+  const filteredData = getFilteredData();
 
   let executed = 0;
   let programmed = 0;
@@ -29,14 +82,18 @@ export default function CardProgress({ selectedGuardia, data }: { selectedGuardi
   const formattedExecuted = executed.toFixed(1);
   const formattedProgrammed = programmed.toFixed(1);
 
-  // Calcular el porcentaje y redondearlo a 1 decimal
-  const percentage = programmed > 0 ? ((executed / programmed) * 100).toFixed(1) : "0.0";
+  // Calcular el porcentaje como promedio de Avance (%) si existe, o fallback al cálculo anterior
+  const percentage = filteredData.length === 0 
+    ? "0.0"
+    : filteredData.some(item => typeof item["Avance (%)"] === 'number')
+      ? (filteredData.reduce((sum, item) => sum + (typeof item["Avance (%)"] === 'number' ? item["Avance (%)"] : 0), 0) / filteredData.length * 100).toFixed(1)
+      : programmed > 0 ? ((executed / programmed) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="bg-slate-900 p-6 rounded-lg text-white">
       <div className="flex items-center gap-2 mb-4">
         <CircleIcon className="h-5 w-5 text-purple-500" />
-        <span className="text-gray-300 font-medium">Total Ejecutado / Programado {`(${selectedGuardia})`}</span>
+        <span className="text-gray-300 font-medium">Total Ejecutado / Programado {selectedGuardia !== "Todo" ? `(${selectedGuardia})` : ""}</span>
       </div>
 
       <div className="flex justify-between mb-3">

@@ -14,7 +14,7 @@ export interface StatiticsData {
   "Orden mes for": number;
   Anual: number;
   Mes_Contable: string;
-  "Orden mes": number;
+  "Pies Perforados": number;
   "CRE E1000 1x12": number;
   "CRE E3000 1x12": number;
   "CRE E5000 1x12": number;
