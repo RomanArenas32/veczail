@@ -1,37 +1,26 @@
-import Image from "next/image";
+import Image from 'next/image';
+import imageLogo from '/public/images/img2.webp';
 
-export default function Component({ children }: { children: React.ReactNode }) {
-
-    return (
-        <div className="flex relative h-screen px-0">
-
-            {/*
-         <div className="absolute top-4 md:top-8 left-4 md:left-8 z-[6]">
-
-         <Image
-          src="/icons/logo-white.svg"
-          alt="Meetlabs Icon"
-          width={36}
-          height={41}
-          priority={true}
-          className="flex "
-          style={{ height: '41px', width: '36px' }}
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col md:flex-row relative h-screen">
+      {/* Contenedor de la imagen - oculto en móvil, mitad de la pantalla en desktop */}
+      <div className="hidden md:block md:w-1/2 relative">
+        <Image
+          src={imageLogo || "/placeholder.svg"}
+          alt="Authentication background"
+          fill
+          priority
+          style={{ objectFit: "cover" }}
         />
       </div>
-        */}
-
-            <div
-                className="hidden md:flex w-1/2  text-white p-8 flex-col-reverse justify-between relative "
-                style={{
-                    backgroundImage: "url('/images/image2.jpeg')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                }}
-            >
-            </div>
-            <div className="w-full md:w-1/2 flex items-center justify-center">
-                <div className="w-full md:max-w-[506px] px-6 md:px-10">{children}</div>
-            </div>
+      
+      {/* Contenedor del contenido - pantalla completa en móvil, mitad en desktop */}
+      <div className="w-full md:w-1/2 flex items-center justify-center min-h-screen md:min-h-0">
+        <div className="w-full md:max-w-[506px] px-6 md:px-10">
+          {children}
         </div>
-    );
+      </div>
+    </div>
+  );
 }

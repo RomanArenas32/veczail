@@ -3,10 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
-import { Mail, Key, User, ArrowRight, Eye, Loader2 as ReloadIcon } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Mail,  Eye, Loader2 as ReloadIcon } from "lucide-react";
 import { z } from "zod";
 import { signInSchema } from "@/schemma/auth";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,9 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signInAction } from "@/action/auth";
+import { toast } from "sonner"
 
 const AuthForm = () => {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -39,12 +37,7 @@ const AuthForm = () => {
     setIsLoading(false);
   
     if (result?.error) {
-      toast({
-        variant: "destructive",
-        title: result.error,
-        description: result.message,
-        duration: 4000,
-      });
+      return toast.error(result.message);
     } else if (result?.success) {
       router.push(result.redirectTo.toString()); // Debería redirigir aquí
     } else {
@@ -74,6 +67,7 @@ const AuthForm = () => {
                         placeholder="Ingrese su email o usuario"
                         {...field}
                         icon={<Mail className="text-[#0B1120]" />}
+                        autoComplete="username"
                       />
                     </FormControl>
                     <FormMessage />
@@ -93,6 +87,7 @@ const AuthForm = () => {
                           type={showPassword ? "text" : "password"}
                           placeholder="Ingrese su contraseña"
                           {...field}
+                          autoComplete="current-password"
                         />
                         <Eye
                           size={20}
@@ -119,7 +114,7 @@ const AuthForm = () => {
             <Button
               type="submit"
               size={"lg"}
-              className="w-full text-white font-bold hover:cursor-pointer"
+              className="w-full text-white font-bold hover:cursor-pointer border border-slate-200"
               disabled={isLoading || form.formState.isSubmitting}
             >
               {isLoading || form.formState.isSubmitting ? (
